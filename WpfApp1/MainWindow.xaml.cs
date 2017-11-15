@@ -22,13 +22,20 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         List<Patron> patronList = new List<Patron>();
+        Random random = new Random();
 
         bool bouncerIsWorking;
+        bool guestIsEntering;
+        bool bartenderIsWorking;
+        bool waitressIsWorking;
+
+        int bouncerSpeed = 1000;
+
+        int groupOfPeople;
 
         public MainWindow()
         {
             InitializeComponent();
-
         }
 
         private void B_PP_Click(object sender, RoutedEventArgs e)
@@ -47,7 +54,18 @@ namespace WpfApp1
 
         private void B_Guest_Click(object sender, RoutedEventArgs e)
         {
+            if (guestIsEntering)
+            {
+                guestIsEntering = false;
+                Dispatcher.Invoke(() => { while (!guestIsEntering) { } });
+                B_Guest.Content = "Play";
 
+            }
+            else
+            {
+                guestIsEntering = true;
+                B_Guest.Content = "Pause";
+            }
         }
 
         private void B_Bouncer_Click(object sender, RoutedEventArgs e)
@@ -61,20 +79,63 @@ namespace WpfApp1
             {
                 bouncerIsWorking = true;
                 B_Bouncer.Content = "Pause";
-                Bouncer();
             }
 
+            Bouncer();
         }
 
+        int temp;
         public async void Bouncer()
         {
-            for (int i = 0; bouncerIsWorking && patronList[0].GetListSize() < 20; i++)
+            if (temp == 0)
             {
-                while (!bouncerIsWorking) { }
-                await Task.Delay(500);
-                L_Guest.Items.Insert(0, patronList[0].Bouncer());
+                await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+                groupOfPeople = random.Next(1, 14);
+                temp = groupOfPeople;
+                L_Bouncer.Items.Insert(0, $"Letting {groupOfPeople} guest(s) in");
+            }
+            
+            await Task.Delay(bouncerSpeed);
+            await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+
+            Log.Items.Insert(0, $"temp 1: {temp}");
+            Log.Items.Insert(0, $"GP size 1: {groupOfPeople}");
+
+            await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+            for (int i = 0; i < groupOfPeople && temp != 0; i++)
+            {
+                await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+                if (temp != 0)
+                {
+                    await Task.Run(() => { for (int x = 0; !bouncerIsWorking; x++) { } });
+                    L_Guest.Items.Insert(0, patronList[0].Bouncer());
+                    temp--;
+                    if (temp <= 0)
+                    {
+                        temp = 0;
+                        break;
+                    }
+                }
+                else
+                {
+                    await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+                    i = groupOfPeople;
+                }
+
+                await Task.Delay(bouncerSpeed);
             }
 
+            await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+            Log.Items.Insert(0, $"temp 2: {temp}");
+            Log.Items.Insert(0, $" ");
+
+            await Task.Delay(bouncerSpeed);
+            if (bouncerIsWorking && temp == 0)
+            {
+                await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+                Bouncer();
+            }
+            await Task.Delay(bouncerSpeed);
         }
 
         public void StartButtons()
