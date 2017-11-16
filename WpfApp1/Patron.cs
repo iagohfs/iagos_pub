@@ -28,7 +28,7 @@ namespace WpfApp1
         string currGuestName;
 
         /// <summary>
-        /// Creates and add a single guest to the Patron GuestList and returns the info about the guest.
+        /// Creates and add a single guest to the Patron GuestList and returns the guest number and name.
         /// </summary>
         public new object Bouncer()
         {

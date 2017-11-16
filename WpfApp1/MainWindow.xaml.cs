@@ -42,17 +42,27 @@ namespace WpfApp1
 
         private void B_PP_Click(object sender, RoutedEventArgs e)
         {
+            if (B_PP.IsInitialized && patronList.Count > 0)
+            {
+                pubIsOpen = false;
+                Reset();
+            }
+
             if (patronList.Count == 0)
             {
                 patronList.Add(new Patron());
-            }
-            bouncerIsWorking = true;
-            B_PP.IsEnabled = false;
 
-            Dispatcher.Invoke(() => Bouncer());
+                pubIsOpen = true;
+                running = true;
 
-            StartButtons();
-            Start();
+                bouncerIsWorking = true;
+                groupDone = true;
+                temp = 0;
+
+                StartButtons();
+                Start();
+            }            
+            
         }
 
         private void B_Guest_Click(object sender, RoutedEventArgs e)
@@ -88,43 +98,61 @@ namespace WpfApp1
         }
 
         int temp;
+        bool groupDone;
 
         public async void Bouncer()
         {
-            if (temp == 0)
+            await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
+            await Task.Delay(bouncerSpeed);
+
+            if (temp == 0 && groupDone && pubIsOpen)
             {
-                await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+                await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
+                await Task.Delay(bouncerSpeed);                
+
                 groupOfPeople = random.Next(0, 14);
                 temp = groupOfPeople;
-                L_Bouncer.Items.Insert(0, $"Letting {groupOfPeople} guest(s) in");
+
+                await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
+
+                if (groupOfPeople > 0 && pubIsOpen)
+                {
+                    L_Bouncer.Items.Insert(0, $"Letting {groupOfPeople} guest(s) in");
+                    groupDone = false;
+                }
+
+                await Task.Delay(bouncerSpeed);
             }
 
             await Task.Delay(bouncerSpeed);
-            await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+            await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
 
-            if (groupOfPeople > 0)
+            if (!groupDone && pubIsOpen)
             {
-                Log.Items.Insert(0, $"{groupOfPeople} guest(s) entering");
+                await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
 
-                await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-                for (int i = 0; i < groupOfPeople && temp != 0; i++)
+                for (int i = 0; i < groupOfPeople && pubIsOpen; i++)
                 {
-                    await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-                    if (temp != 0)
+                    if (temp <= 0)
                     {
-                        await Task.Run(() => { for (int x = 0; !bouncerIsWorking; x++) { } });
-                        L_Guest.Items.Insert(0, patronList[0].Bouncer());
-                        temp--;
-                        if (temp <= 0)
-                        {
-                            temp = 0;
-                            break;
-                        }
+                        temp = 0;
+                        groupDone = true;
+                        break;
                     }
-                    else
+
+                    if (temp > 0)
                     {
-                        await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-                        i = groupOfPeople;
+                        await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
+                        L_Guest.Items.Insert(0, patronList[0].Bouncer() + " has entered");
+                        if (Debug) { Log.Items.Insert(0, $"Bouncer forloop: {temp}"); }
+                        temp--;
+                    }
+
+                    if (temp <= 0)
+                    {
+                        temp = 0;
+                        groupDone = true;
+                        break;
                     }
 
                     await Task.Delay(bouncerSpeed);
@@ -132,31 +160,39 @@ namespace WpfApp1
             }
             else
             {
-                L_Bouncer.Items.Insert(0, "Wating...");
+                if (pubIsOpen)
+                {
+                    L_Bouncer.Items.Insert(0, "Wating for guest");
+                }
+
+                await Task.Delay(bouncerSpeed);
             }
 
-            await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-
-            await Task.Delay(bouncerSpeed);
-            if (bouncerIsWorking && temp == 0)
+            if (temp <= 0 && pubIsOpen)
             {
-                await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-                Bouncer();
+                temp = 0;
+                groupDone = true;
             }
-            await Task.Delay(bouncerSpeed);
+
+            if (Debug) { Log.Items.Insert(0, $"Bouncer final value: {temp}"); }
         }
+
+        int tempIndex;
+        private bool Debug;
+        private bool running;
 
         public async void Bartender()
         {
-
+            tempIndex = patronList[0].GetListSize();
+            Log.Items.Insert(0, "bartender method");
         }
 
         public async void Start()
         {
-            while (pubIsOpen)
-            {
-                await Task.Delay(runPubSpeed);
-                Bouncer();
+            while (running)
+            {                
+                if(pubIsOpen) Bouncer();
+                await Task.Delay(runPubSpeed + bouncerSpeed);
             }
 
         }
@@ -175,7 +211,41 @@ namespace WpfApp1
             B_Waitress.IsEnabled = true;
             B_Waitress.Content = "Pause";
 
-            B_PP.Content = "Pause All";
+            B_PP.Content = "Stop Everything";
+        }
+
+        public void Reset()
+        {
+            B_Bartender.IsEnabled = false;
+            B_Bartender.Content = "Pause";
+
+            B_Bouncer.IsEnabled = false;
+            B_Bouncer.Content = "Pause";
+
+            B_Guest.IsEnabled = false;
+            B_Guest.Content = "Pause";
+
+            B_Waitress.IsEnabled = false;
+            B_Waitress.Content = "Pause";
+
+            B_PP.IsEnabled = false;
+
+            Debugger.IsEnabled = false;
+        }
+
+        private void Debugger_Click(object sender, RoutedEventArgs e)
+        {
+            if(Debugger.Content.ToString() == "Debug On")
+            {
+                Debugger.Content = "Debug Off";
+                Debug = true;
+            }
+            else
+            {
+                Debugger.Content = "Debug On";
+                Debug = false;
+            }
         }
     }
 }
+
