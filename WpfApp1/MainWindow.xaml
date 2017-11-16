@@ -24,6 +24,9 @@
         <Label Content="Speed" HorizontalAlignment="Left" Margin="781,219,0,0" VerticalAlignment="Top" Height="26" Width="42"/>
         <Label Content="Log" HorizontalAlignment="Left" Margin="730,3,0,0" VerticalAlignment="Top"/>
         <ListBox x:Name="Log" HorizontalAlignment="Left" Height="153" Margin="730,34,0,0" VerticalAlignment="Top" Width="140"/>
+        <Label x:Name="BarStatus_Label" Content="Bar Closed.&#xD;&#xA;Glasses: 20&#xD;&#xA;Chairs: 15" HorizontalAlignment="Left" Margin="365,231,0,0" VerticalAlignment="Top" Height="69" Width="150"/>
+        <Label x:Name="Guest_Label" Content="Served: 0&#xD;&#xA;Sitting: 0&#xD;&#xA;Drinking: 0&#xD;&#xA;" HorizontalAlignment="Left" Margin="185,231,0,0" VerticalAlignment="Top" Height="69" Width="150"/>
+        <Label x:Name="Waitress_Label" Content="Dirty Glasses: 0" HorizontalAlignment="Left" Margin="545,231,0,0" VerticalAlignment="Top" Width="155" Height="69"/>
 
     </Grid>
 </Window>

@@ -28,8 +28,10 @@ namespace WpfApp1
         bool guestIsEntering;
         bool bartenderIsWorking;
         bool waitressIsWorking;
+        bool pubIsOpen;
 
         int bouncerSpeed = 1000;
+        private int runPubSpeed = 1000;
 
         int groupOfPeople;
 
@@ -50,6 +52,7 @@ namespace WpfApp1
             Dispatcher.Invoke(() => Bouncer());
 
             StartButtons();
+            Start();
         }
 
         private void B_Guest_Click(object sender, RoutedEventArgs e)
@@ -81,53 +84,58 @@ namespace WpfApp1
                 B_Bouncer.Content = "Pause";
             }
 
-            Bouncer();
+            Start();
         }
 
         int temp;
+
         public async void Bouncer()
         {
             if (temp == 0)
             {
                 await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-                groupOfPeople = random.Next(1, 14);
+                groupOfPeople = random.Next(0, 14);
                 temp = groupOfPeople;
                 L_Bouncer.Items.Insert(0, $"Letting {groupOfPeople} guest(s) in");
             }
-            
+
             await Task.Delay(bouncerSpeed);
             await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
 
-            Log.Items.Insert(0, $"temp 1: {temp}");
-            Log.Items.Insert(0, $"GP size 1: {groupOfPeople}");
-
-            await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-            for (int i = 0; i < groupOfPeople && temp != 0; i++)
+            if (groupOfPeople > 0)
             {
+                Log.Items.Insert(0, $"{groupOfPeople} guest(s) entering");
+
                 await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-                if (temp != 0)
-                {
-                    await Task.Run(() => { for (int x = 0; !bouncerIsWorking; x++) { } });
-                    L_Guest.Items.Insert(0, patronList[0].Bouncer());
-                    temp--;
-                    if (temp <= 0)
-                    {
-                        temp = 0;
-                        break;
-                    }
-                }
-                else
+                for (int i = 0; i < groupOfPeople && temp != 0; i++)
                 {
                     await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-                    i = groupOfPeople;
-                }
+                    if (temp != 0)
+                    {
+                        await Task.Run(() => { for (int x = 0; !bouncerIsWorking; x++) { } });
+                        L_Guest.Items.Insert(0, patronList[0].Bouncer());
+                        temp--;
+                        if (temp <= 0)
+                        {
+                            temp = 0;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
+                        i = groupOfPeople;
+                    }
 
-                await Task.Delay(bouncerSpeed);
+                    await Task.Delay(bouncerSpeed);
+                }
+            }
+            else
+            {
+                L_Bouncer.Items.Insert(0, "Wating...");
             }
 
             await Task.Run(async () => { for (int x = 0; !bouncerIsWorking; x++) { x--; await Task.Delay(1); } });
-            Log.Items.Insert(0, $"temp 2: {temp}");
-            Log.Items.Insert(0, $" ");
 
             await Task.Delay(bouncerSpeed);
             if (bouncerIsWorking && temp == 0)
@@ -136,6 +144,21 @@ namespace WpfApp1
                 Bouncer();
             }
             await Task.Delay(bouncerSpeed);
+        }
+
+        public async void Bartender()
+        {
+
+        }
+
+        public async void Start()
+        {
+            while (pubIsOpen)
+            {
+                await Task.Delay(runPubSpeed);
+                Bouncer();
+            }
+
         }
 
         public void StartButtons()
