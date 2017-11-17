@@ -28,10 +28,20 @@ namespace WpfApp1
         bool guestIsEntering;
         bool bartenderIsWorking;
         bool waitressIsWorking;
+
         bool pubIsOpen;
+        bool groupDone;
+
+        private bool Debug;
 
         private int runPubSpeed;
-        int bouncerSpeed;
+        private int bouncerSpeed;
+        private int bartenderSpeed;
+
+        int bartenderIndex;
+        int bartenderTemp;
+        int bartenderLastPos;
+        int bouncerTemp;
 
         int groupOfPeople;
 
@@ -53,13 +63,16 @@ namespace WpfApp1
                 patronList.Add(new Patron());
 
                 bouncerSpeed = runPubSpeed;
+                bartenderSpeed = runPubSpeed;
 
                 pubIsOpen = true;
-                running = true;
 
                 bouncerIsWorking = true;
+                bartenderIsWorking = true;
+                bartenderLastPos = 0;
+
                 groupDone = true;
-                temp = 0;
+                bouncerTemp = 0;
 
                 StartButtons();
                 Start();
@@ -99,21 +112,38 @@ namespace WpfApp1
             Start();
         }
 
-        int temp;
-        bool groupDone;
+        private void Debugger_Click(object sender, RoutedEventArgs e)
+        {
+            HelpL.Content = "";
+            if (Debugger.Content.ToString() == "Debug Off")
+            {
+                Debugger.Content = "Debug On";
+                Debug = true;
+            }
+            else
+            {
+                Debugger.Content = "Debug Off";
+                Debug = false;
+            }
+        }
+
+        private void S_Speed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            runPubSpeed = (int)S_Speed.Value * 200;
+        }
 
         public async void Bouncer()
         {
             await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
             await Task.Delay(bouncerSpeed + runPubSpeed);
 
-            if (temp == 0 && groupDone && pubIsOpen)
+            if (bouncerTemp == 0 && groupDone && pubIsOpen)
             {
                 await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
                 await Task.Delay(bouncerSpeed + runPubSpeed);
 
                 groupOfPeople = random.Next(0, 14);
-                temp = groupOfPeople;
+                bouncerTemp = groupOfPeople;
 
                 await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
 
@@ -135,28 +165,29 @@ namespace WpfApp1
 
                 for (int i = 0; i < groupOfPeople && pubIsOpen; i++)
                 {
-                    if (temp <= 0)
+                    if (bouncerTemp <= 0)
                     {
-                        temp = 0;
+                        bouncerTemp = 0;
                         groupDone = true;
                         break;
                     }
 
-                    if (temp > 0)
+                    if (bouncerTemp > 0)
                     {
                         await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
                         L_Guest.Items.Insert(0, patronList[0].Bouncer() + " has entered");
-                        if (Debug) { Log.Items.Insert(0, $"Bouncer forloop: {temp}"); }
-                        temp--;
+                        if (Debug) { Log.Items.Insert(0, $"Bouncer forloop: {bouncerTemp}"); }
+                        bouncerTemp--;
                     }
 
-                    if (temp <= 0)
+                    if (bouncerTemp <= 0)
                     {
-                        temp = 0;
+                        bouncerTemp = 0;
                         groupDone = true;
                         break;
                     }
 
+                    bartenderTemp = patronList[0].GuestList.Count;
                     await Task.Delay(bouncerSpeed + runPubSpeed);
                 }
             }
@@ -170,30 +201,63 @@ namespace WpfApp1
                 await Task.Delay(bouncerSpeed + runPubSpeed);
             }
 
-            if (temp <= 0 && pubIsOpen)
+            if (bouncerTemp <= 0 && pubIsOpen)
             {
-                temp = 0;
+                bouncerTemp = 0;
                 groupDone = true;
             }
 
-            if (Debug) { Log.Items.Insert(0, $"Bouncer final value: {temp}"); }
+            if (Debug) { Log.Items.Insert(0, $"Bouncer final value: {bouncerTemp}"); }
 
-            if (pubIsOpen && temp == 0) Bouncer();
+            if (pubIsOpen && bouncerTemp == 0) Bouncer();
         }
 
-        int tempIndex;
-        private bool Debug;
-        private bool running;
+        int lastIndex = 0;
 
         public async void Bartender()
         {
-            tempIndex = patronList[0].GetListSize();
-            Log.Items.Insert(0, "bartender method");
+            await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
+            //await Task.Delay(bartenderSpeed + runPubSpeed);
+
+            if (bartenderIsWorking && pubIsOpen)
+            {
+
+                for (int i = bartenderTemp; bartenderTemp > 0 && bartenderIsWorking & pubIsOpen; i--)
+                {
+                    i++;
+                    await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
+                    await Task.Delay(bartenderSpeed + runPubSpeed);
+
+                    if (bartenderTemp > 0)
+                    {
+
+                        if (bartenderTemp > 0 && lastIndex != bartenderTemp)
+                        {
+                            L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
+                            lastIndex = bartenderTemp;
+                            L_Guest.SelectedIndex = bartenderIndex;
+
+                            Log.Items.Insert(0, bartenderIndex);
+                        }
+
+                    }
+
+                    await Task.Delay(bartenderSpeed + runPubSpeed);
+                    //Log.Items.Insert(0, bartenderTemp);
+                }
+
+            }
+
+            if (bartenderIsWorking && pubIsOpen) Bartender();
         }
 
-        public async void Start()
+        public void Start()
         {
-            if(pubIsOpen)Bouncer();
+            if (pubIsOpen)
+            {
+                Bouncer();
+                Bartender();
+            }
         }
 
         public void StartButtons()
@@ -232,25 +296,6 @@ namespace WpfApp1
             Debugger.IsEnabled = false;
         }
 
-        private void Debugger_Click(object sender, RoutedEventArgs e)
-        {
-            HelpL.Content = "";
-            if (Debugger.Content.ToString() == "Debug Off")
-            {
-                Debugger.Content = "Debug On";
-                Debug = true;
-            }
-            else
-            {
-                Debugger.Content = "Debug Off";
-                Debug = false;
-            }
-        }
-
-        private void S_Speed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            runPubSpeed = (int)S_Speed.Value * 200;
-        }
     }
 }
 
