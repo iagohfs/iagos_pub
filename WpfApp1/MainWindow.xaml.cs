@@ -30,8 +30,8 @@ namespace WpfApp1
         bool waitressIsWorking;
         bool pubIsOpen;
 
-        int bouncerSpeed = 1000;
-        private int runPubSpeed = 1000;
+        private int runPubSpeed;
+        int bouncerSpeed;
 
         int groupOfPeople;
 
@@ -52,6 +52,8 @@ namespace WpfApp1
             {
                 patronList.Add(new Patron());
 
+                bouncerSpeed = runPubSpeed;
+
                 pubIsOpen = true;
                 running = true;
 
@@ -61,8 +63,8 @@ namespace WpfApp1
 
                 StartButtons();
                 Start();
-            }            
-            
+            }
+
         }
 
         private void B_Guest_Click(object sender, RoutedEventArgs e)
@@ -103,12 +105,12 @@ namespace WpfApp1
         public async void Bouncer()
         {
             await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
-            await Task.Delay(bouncerSpeed);
+            await Task.Delay(bouncerSpeed + runPubSpeed);
 
             if (temp == 0 && groupDone && pubIsOpen)
             {
                 await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
-                await Task.Delay(bouncerSpeed);                
+                await Task.Delay(bouncerSpeed + runPubSpeed);
 
                 groupOfPeople = random.Next(0, 14);
                 temp = groupOfPeople;
@@ -121,10 +123,10 @@ namespace WpfApp1
                     groupDone = false;
                 }
 
-                await Task.Delay(bouncerSpeed);
+                await Task.Delay(bouncerSpeed + runPubSpeed);
             }
 
-            await Task.Delay(bouncerSpeed);
+            await Task.Delay(bouncerSpeed + runPubSpeed);
             await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
 
             if (!groupDone && pubIsOpen)
@@ -155,7 +157,7 @@ namespace WpfApp1
                         break;
                     }
 
-                    await Task.Delay(bouncerSpeed);
+                    await Task.Delay(bouncerSpeed + runPubSpeed);
                 }
             }
             else
@@ -165,7 +167,7 @@ namespace WpfApp1
                     L_Bouncer.Items.Insert(0, "Wating for guest");
                 }
 
-                await Task.Delay(bouncerSpeed);
+                await Task.Delay(bouncerSpeed + runPubSpeed);
             }
 
             if (temp <= 0 && pubIsOpen)
@@ -175,6 +177,8 @@ namespace WpfApp1
             }
 
             if (Debug) { Log.Items.Insert(0, $"Bouncer final value: {temp}"); }
+
+            if (pubIsOpen && temp == 0) Bouncer();
         }
 
         int tempIndex;
@@ -189,12 +193,7 @@ namespace WpfApp1
 
         public async void Start()
         {
-            while (running)
-            {                
-                if(pubIsOpen) Bouncer();
-                await Task.Delay(runPubSpeed + bouncerSpeed);
-            }
-
+            if(pubIsOpen)Bouncer();
         }
 
         public void StartButtons()
@@ -235,16 +234,22 @@ namespace WpfApp1
 
         private void Debugger_Click(object sender, RoutedEventArgs e)
         {
-            if(Debugger.Content.ToString() == "Debug On")
+            HelpL.Content = "";
+            if (Debugger.Content.ToString() == "Debug Off")
             {
-                Debugger.Content = "Debug Off";
+                Debugger.Content = "Debug On";
                 Debug = true;
             }
             else
             {
-                Debugger.Content = "Debug On";
+                Debugger.Content = "Debug Off";
                 Debug = false;
             }
+        }
+
+        private void S_Speed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            runPubSpeed = (int)S_Speed.Value * 200;
         }
     }
 }
