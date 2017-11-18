@@ -25,18 +25,20 @@ namespace WpfApp1
         };
 
         private int guestNr = 0;
+        private int index = 0;
         string currGuestName;
 
         /// <summary>
-        /// Creates and add a single guest to the Patron GuestList and returns the info about the guest.
+        /// Creates and add a single guest to the Patron GuestList and returns the guest number and name.
         /// </summary>
         public new object Bouncer()
         {
             currGuestName = Names[Random.Next(1, 31)];
             guestNr++;
-            GuestList.Insert(0, new Guest(guestNr, currGuestName));
+            GuestList.Add(new Guest(guestNr, currGuestName));
+            if(GuestList.Count > 1) { index++; }
 
-            return GuestList[0].GuestInfo();
+            return GuestList[index].GuestInfo();
         }
 
         /// <summary>
