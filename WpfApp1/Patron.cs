@@ -25,6 +25,7 @@ namespace WpfApp1
         };
 
         private int guestNr = 0;
+        private int index = 0;
         string currGuestName;
 
         /// <summary>
@@ -34,9 +35,10 @@ namespace WpfApp1
         {
             currGuestName = Names[Random.Next(1, 31)];
             guestNr++;
-            GuestList.Insert(0, new Guest(guestNr, currGuestName));
+            GuestList.Add(new Guest(guestNr, currGuestName));
+            if(GuestList.Count > 1) { index++; }
 
-            return GuestList[0].GuestInfo();
+            return GuestList[index].GuestInfo();
         }
 
         /// <summary>

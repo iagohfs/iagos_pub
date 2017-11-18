@@ -68,8 +68,9 @@ namespace WpfApp1
                 pubIsOpen = true;
 
                 bouncerIsWorking = true;
+                bouncerRunning = false;
                 bartenderIsWorking = true;
-                bartenderLastPos = 0;
+                bartenderIndex = -1;
 
                 groupDone = true;
                 bouncerTemp = 0;
@@ -129,7 +130,7 @@ namespace WpfApp1
 
         private void S_Speed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            runPubSpeed = (int)S_Speed.Value * 200;
+            runPubSpeed = (int)S_Speed.Value * 250;
         }
 
         public async void Bouncer()
@@ -189,6 +190,8 @@ namespace WpfApp1
 
                     bartenderTemp = patronList[0].GuestList.Count;
                     await Task.Delay(bouncerSpeed + runPubSpeed);
+
+                    if (bouncerIsWorking) bouncerRunning = true;
                 }
             }
             else
@@ -213,6 +216,7 @@ namespace WpfApp1
         }
 
         int lastIndex = 0;
+        private bool bouncerRunning;
 
         public async void Bartender()
         {
@@ -222,26 +226,24 @@ namespace WpfApp1
             if (bartenderIsWorking && pubIsOpen)
             {
 
-                for (int i = bartenderTemp; bartenderTemp > 0 && bartenderIsWorking & pubIsOpen; i--)
+                for (int i = bartenderTemp; bartenderTemp > 0 && bartenderIsWorking & pubIsOpen && bartenderTemp > bartenderIndex; i--)
                 {
                     i++;
                     await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
                     await Task.Delay(bartenderSpeed + runPubSpeed);
 
-                    if (bartenderTemp > 0)
+                    if (bartenderTemp - 1 > bartenderIndex)
                     {
+                        bartenderIndex++;
 
-                        if (bartenderTemp > 0 && lastIndex != bartenderTemp)
-                        {
-                            L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
-                            lastIndex = bartenderTemp;
-                            L_Guest.SelectedIndex = bartenderIndex;
+                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
+                        //lastIndex = bartenderTemp;
+                        //L_Guest.SelectedIndex = bartenderIndex;
 
-                            Log.Items.Insert(0, bartenderIndex);
-                        }
-
+                        Log.Items.Insert(0, "B Index: " + bartenderIndex);
                     }
 
+                    if (bartenderTemp == bartenderIndex) { break; }
                     await Task.Delay(bartenderSpeed + runPubSpeed);
                     //Log.Items.Insert(0, bartenderTemp);
                 }
