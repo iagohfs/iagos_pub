@@ -5,7 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WpfApp1
-{
+{/// <summary>
+ /// Patron aka bouncer class contains guest name list, public guestlist, bouncer who adds a guest to thelist and return a guest object.
+ /// </summary>
     class Patron : MainWindow
     {
         Random Random = new Random();
@@ -29,32 +31,16 @@ namespace WpfApp1
         string currGuestName;
 
         /// <summary>
-        /// Creates and add a single guest to the Patron GuestList and returns the guest number and name.
+        /// Creates and add a single guest to the Patron public GuestList and returns the guest number and name.
         /// </summary>
         public new object Bouncer()
         {
             currGuestName = Names[Random.Next(1, 31)];
             guestNr++;
             GuestList.Add(new Guest(guestNr, currGuestName));
-            if(GuestList.Count > 1) { index++; }
+            if (GuestList.Count > 1) { index++; }
 
             return GuestList[index].GuestInfo();
-        }
-
-        /// <summary>
-        /// Returns the size of the GuestList.
-        /// </summary>
-        public int GetListSize()
-        {
-            return GuestList.Count();
-        }
-
-        /// <summary>
-        /// Returns a Guest object from a desired index of the GuestList.
-        /// </summary>
-        public object RtGuestFromList(int index)
-        {
-            return GuestList[index];
         }
 
         /// <summary>

@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WpfApp1
-{
-    class Guest
+{/// <summary>
+ /// Constructor for object Guest.
+ /// </summary>
+    class Guest : Patron
     {
         public string Name { get; set; }
         public int Number { get; set; }
@@ -17,9 +19,12 @@ namespace WpfApp1
             Name = name;
         }
 
+        /// <summary>
+        /// Returns guest number and name.
+        /// </summary>
         public string GuestInfo()
-        {            
+        {
             return $"{Number}. {Name}";
-        }        
+        }
     }
 }

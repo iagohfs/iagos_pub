@@ -28,6 +28,8 @@ namespace WpfApp1
         bool guestIsEntering;
         bool bartenderIsWorking;
         bool waitressIsWorking;
+        bool firstBartenderIndex;
+        bool bartenderHasServed;
 
         bool pubIsOpen;
         bool groupDone;
@@ -37,10 +39,15 @@ namespace WpfApp1
         private int runPubSpeed;
         private int bouncerSpeed;
         private int bartenderSpeed;
+        private int guestSpeed;
+
+        int cleanGlasses;
+        int chairs;
+        int nrOfGuestServed;
+        int dirtyGlasses;
 
         int bartenderIndex;
         int bartenderTemp;
-        int bartenderLastPos;
         int bouncerTemp;
 
         int groupOfPeople;
@@ -64,18 +71,24 @@ namespace WpfApp1
 
                 bouncerSpeed = runPubSpeed;
                 bartenderSpeed = runPubSpeed;
+                guestSpeed = (runPubSpeed * 2);
 
                 pubIsOpen = true;
+                cleanGlasses = 20;
+                chairs = 15;
+                dirtyGlasses = 0;
+                nrOfGuestServed = 0;
 
                 bouncerIsWorking = true;
-                bouncerRunning = false;
+
                 bartenderIsWorking = true;
+                firstBartenderIndex = true;
+                bartenderHasServed = false;
                 bartenderIndex = -1;
 
                 groupDone = true;
                 bouncerTemp = 0;
 
-                StartButtons();
                 Start();
             }
 
@@ -133,6 +146,87 @@ namespace WpfApp1
             runPubSpeed = (int)S_Speed.Value * 250;
         }
 
+        public async void Bartender()
+        {
+            await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
+            await Task.Delay(bartenderSpeed + runPubSpeed);
+            BarStatus();
+            if (cleanGlasses <= 0)
+            {
+                Label_Bartender.Content = "Bartender (Waiting)";
+            }
+            else
+            {
+                Label_Bartender.Content = "Bartender (Working)";
+            }
+
+            bartenderHasServed = false;
+
+            if (bartenderIsWorking && pubIsOpen && cleanGlasses > 0)
+            {
+                for (int i = 0; bartenderTemp > 0 && bartenderIsWorking && pubIsOpen && bartenderTemp > bartenderIndex; i--)
+                {
+                    bartenderHasServed = false;
+                    i++;
+                    await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
+                    await Task.Delay(bartenderSpeed + runPubSpeed);
+
+                    if (bartenderTemp == 1 && firstBartenderIndex)
+                    {
+                        bartenderIndex++;
+
+                        cleanGlasses--;
+                        BarStatus();
+                        await Task.Delay(bartenderSpeed + runPubSpeed);
+                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
+
+                        await Task.Delay(bartenderSpeed + runPubSpeed);
+                        L_Bartender.Items.Insert(0, patronList[0].GuestList[bartenderIndex].Name + " served.");
+                        nrOfGuestServed++;
+                        BarStatus();
+                        if (Debug) Log.Items.Insert(0, "Bart Index: " + bartenderIndex);
+
+                        firstBartenderIndex = false;
+                        bartenderHasServed = true;
+                    }
+
+                    if (bartenderTemp - 1 > bartenderIndex && cleanGlasses > 0)
+                    {
+                        bartenderIndex++;
+
+                        cleanGlasses--;
+                        BarStatus();
+                        await Task.Delay(bartenderSpeed + runPubSpeed);
+                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
+
+                        await Task.Delay(bartenderSpeed + runPubSpeed);
+                        L_Bartender.Items.Insert(0, patronList[0].GuestList[bartenderIndex].Name + " served.");
+                        nrOfGuestServed++;
+                        BarStatus();
+
+                        if (Debug) Log.Items.Insert(0, "Bart Index: " + bartenderIndex);
+                        bartenderHasServed = true;
+                    }
+
+                    if (cleanGlasses < 1)
+                    {
+                        Label_Bartender.Content = "Bartender (Waiting)";
+                    }
+                    else
+                    {
+                        Label_Bartender.Content = "Bartender (Working)";
+                    }
+
+                    if (bartenderTemp == bartenderIndex) { break; }
+                    await Task.Delay(bartenderSpeed + runPubSpeed);
+                    //Log.Items.Insert(0, bartenderTemp);
+                }
+
+            }
+
+            if (bartenderIsWorking && pubIsOpen) Bartender();
+        }
+
         public async void Bouncer()
         {
             await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
@@ -143,7 +237,7 @@ namespace WpfApp1
                 await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
                 await Task.Delay(bouncerSpeed + runPubSpeed);
 
-                groupOfPeople = random.Next(0, 14);
+                groupOfPeople = random.Next(0, 15);
                 bouncerTemp = groupOfPeople;
 
                 await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
@@ -179,6 +273,7 @@ namespace WpfApp1
                         L_Guest.Items.Insert(0, patronList[0].Bouncer() + " has entered");
                         if (Debug) { Log.Items.Insert(0, $"Bouncer forloop: {bouncerTemp}"); }
                         bouncerTemp--;
+                        bartenderTemp = patronList[0].GuestList.Count;
                     }
 
                     if (bouncerTemp <= 0)
@@ -187,11 +282,8 @@ namespace WpfApp1
                         groupDone = true;
                         break;
                     }
-
-                    bartenderTemp = patronList[0].GuestList.Count;
                     await Task.Delay(bouncerSpeed + runPubSpeed);
 
-                    if (bouncerIsWorking) bouncerRunning = true;
                 }
             }
             else
@@ -215,51 +307,57 @@ namespace WpfApp1
             if (pubIsOpen && bouncerTemp == 0) Bouncer();
         }
 
-        int lastIndex = 0;
-        private bool bouncerRunning;
-
-        public async void Bartender()
+        int guestIndex;
+        public async void Guest()
         {
-            await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
-            //await Task.Delay(bartenderSpeed + runPubSpeed);
+            await Task.Delay(1);
 
-            if (bartenderIsWorking && pubIsOpen)
+            if (bartenderHasServed || guestIndex < bartenderTemp - 1)
             {
+                await Task.Delay(guestSpeed + runPubSpeed);
 
-                for (int i = bartenderTemp; bartenderTemp > 0 && bartenderIsWorking & pubIsOpen && bartenderTemp > bartenderIndex; i--)
+                if (chairs > 0)
                 {
-                    i++;
-                    await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
-                    await Task.Delay(bartenderSpeed + runPubSpeed);
-
-                    if (bartenderTemp - 1 > bartenderIndex)
-                    {
-                        bartenderIndex++;
-
-                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
-                        //lastIndex = bartenderTemp;
-                        //L_Guest.SelectedIndex = bartenderIndex;
-
-                        Log.Items.Insert(0, "B Index: " + bartenderIndex);
-                    }
-
-                    if (bartenderTemp == bartenderIndex) { break; }
-                    await Task.Delay(bartenderSpeed + runPubSpeed);
-                    //Log.Items.Insert(0, bartenderTemp);
+                    Log.Items.Insert(0, $"{patronList[0].GuestList[guestIndex].GuestInfo()} is sitting");
+                    chairs--;
+                    await Task.Delay(guestSpeed + runPubSpeed);
+                    Log.Items.Insert(0, $"{patronList[0].GuestList[guestIndex].GuestInfo()} is drinking");
+                    await Task.Delay(guestSpeed + runPubSpeed * 15);
+                    Log.Items.Insert(0, $"{patronList[0].GuestList[guestIndex].GuestInfo()} has left");
+                    guestIndex++;
+                    chairs++;
                 }
-
+                else
+                {
+                    Log.Items.Insert(0, $"{patronList[0].GuestList[guestIndex].GuestInfo()} is standing");
+                    await Task.Delay(guestSpeed + runPubSpeed);
+                    Log.Items.Insert(0, $"{patronList[0].GuestList[guestIndex].GuestInfo()} is drinking");
+                    await Task.Delay(guestSpeed + runPubSpeed * 15);
+                    Log.Items.Insert(0, $"{patronList[0].GuestList[guestIndex].GuestInfo()} has left");
+                    guestIndex++;
+                }
             }
 
-            if (bartenderIsWorking && pubIsOpen) Bartender();
+            if (pubIsOpen) Guest();
         }
 
         public void Start()
         {
+            StartButtons();
+
             if (pubIsOpen)
             {
                 Bouncer();
                 Bartender();
+                Guest();
             }
+        }
+
+        public void BarStatus()
+        {
+            Guest_Label.Content = $"Served: {nrOfGuestServed}\nSitting: {chairs}";
+            BarStatus_Label.Content = $"Bar is Open!\nGlasses: {cleanGlasses}\nChairs: {chairs}";
+            Dirty_Label.Content = $"Dirty Glass(es): {dirtyGlasses}";
         }
 
         public void StartButtons()
@@ -296,6 +394,7 @@ namespace WpfApp1
             B_PP.IsEnabled = false;
 
             Debugger.IsEnabled = false;
+
         }
 
     }
