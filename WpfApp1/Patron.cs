@@ -8,7 +8,7 @@ namespace WpfApp1
 {/// <summary>
  /// Patron aka bouncer class contains guest name list, public guestlist, bouncer who adds a guest to thelist and return a guest object.
  /// </summary>
-    class Patron : MainWindow
+    public class Patron : MainWindow
     {
         Random Random = new Random();
         public List<Guest> GuestList = new List<Guest>();
@@ -43,13 +43,6 @@ namespace WpfApp1
             return GuestList[index].GuestInfo();
         }
 
-        /// <summary>
-        /// Tells which guest from the Guestlist has left.
-        /// </summary>
-        public void GuestLeft(int index)
-        {
-            Log.Items.Insert(0, $"{GuestList[index]} has left");
-        }
-
     }
+
 }

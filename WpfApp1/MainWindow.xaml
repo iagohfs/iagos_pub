@@ -15,9 +15,8 @@
         <ListBox x:Name="L_Waitress" HorizontalAlignment="Left" Height="153" Margin="549,34,0,0" VerticalAlignment="Top" Width="151"/>
         <Label Content="Waitress" HorizontalAlignment="Left" Margin="549,3,0,0" VerticalAlignment="Top" Width="151"/>
         <Button x:Name="B_Bouncer" Content="" HorizontalAlignment="Left" Margin="10,203,0,0" VerticalAlignment="Top" Width="150" IsEnabled="False" Click="B_Bouncer_Click"/>
-        <Button x:Name="B_Guest" Content="" HorizontalAlignment="Left" Margin="190,203,0,0" VerticalAlignment="Top" Width="150" IsEnabled="False" Click="B_Guest_Click"/>
-        <Button x:Name="B_Bartender" Content="" HorizontalAlignment="Left" Margin="370,203,0,0" VerticalAlignment="Top" Width="150" IsEnabled="False"/>
-        <Button x:Name="B_Waitress" Content="" HorizontalAlignment="Left" Margin="549,203,0,0" VerticalAlignment="Top" Width="151" IsEnabled="False"/>
+        <Button x:Name="B_Bartender" Content="" HorizontalAlignment="Left" Margin="370,203,0,0" VerticalAlignment="Top" Width="150" IsEnabled="False" Click="B_Bartender_Click"/>
+        <Button x:Name="B_Waitress" Content="" HorizontalAlignment="Left" Margin="549,203,0,0" VerticalAlignment="Top" Width="151" IsEnabled="False" Click="B_Waitress_Click"/>
         <Button x:Name="B_PP" Content="Start" HorizontalAlignment="Left" Margin="730,269,0,0" VerticalAlignment="Top" Width="140" Height="40" Click="B_PP_Click"/>
         <Slider x:Name="S_Speed" HorizontalAlignment="Left" Margin="730,245,0,0" VerticalAlignment="Top" Width="140" Maximum="2" Value="1" Height="19" ValueChanged="S_Speed_ValueChanged" TickFrequency="0.1"/>
         <Label Content="&lt;- Fast | Normal | Slow -&gt;" HorizontalAlignment="Left" Margin="727,219,0,0" VerticalAlignment="Top" Height="26" Width="154"/>
@@ -28,6 +27,7 @@
         <Button x:Name="Debugger" Content="Debug Off" HorizontalAlignment="Left" Margin="730,203,0,0" VerticalAlignment="Top" Width="65" Click="Debugger_Click"/>
         <Label x:Name="HelpL" Content="Off by default" HorizontalAlignment="Left" Margin="796,200,0,0" VerticalAlignment="Top" Height="25"/>
         <Label x:Name="Dirty_Label" Content="Dirty Glass(es): 0" HorizontalAlignment="Left" Margin="543,231,0,0" VerticalAlignment="Top"/>
+        <Slider x:Name="S_Waitress" HorizontalAlignment="Left" Margin="549,280,0,0" VerticalAlignment="Top" Width="151" Value="1" Maximum="2" ValueChanged="S_Waitress_ValueChanged"/>
 
     </Grid>
 </Window>

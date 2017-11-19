@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace WpfApp1
 {/// <summary>
  /// Constructor for object Guest.
  /// </summary>
-    class Guest : Patron
+    public class Guest : MainWindow
     {
+        public delegate string DoThis();
         public string Name { get; set; }
         public int Number { get; set; }
 
@@ -22,9 +24,24 @@ namespace WpfApp1
         /// <summary>
         /// Returns guest number and name.
         /// </summary>
-        public string GuestInfo()
+        public string GuestInfo() => $"{Number}. {Name}";
+
+        public string GuestAction()
         {
-            return $"{Number}. {Name}";
+            DoThis doThis = new DoThis(GuestAction);
+            doThis();
+            doThis += Drink;
+            doThis += Leave;
+
+            return null;
         }
+
+        public string Sit() => $"{Number}. {Name} is sitting";
+
+        public string Stand() => $"{Number}. {Name} is standing";
+
+        public string Drink() => $"{Number}. {Name} is drinking";
+
+        public string Leave() => $"{Number}. {Name} has left";
     }
 }
