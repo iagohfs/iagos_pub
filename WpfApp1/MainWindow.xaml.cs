@@ -21,7 +21,7 @@ namespace WpfApp1
     /// </summary>
     partial class MainWindow : Window
     {
-        List<Patron> patronList = new List<Patron>();
+        List<Guest> patronList = new List<Guest>();
         Random random = new Random();
         public delegate string GuestDel();
 
@@ -68,10 +68,9 @@ namespace WpfApp1
                 Reset();
             }
 
-
             if (patronList.Count == 0)
             {
-                patronList.Add(new Patron());
+                patronList.Add(new Guest());
 
                 bouncerSpeed = runPubSpeed;
                 bartenderSpeed = runPubSpeed;
@@ -242,10 +241,10 @@ namespace WpfApp1
                     if (guestCount == bartenderIndex) { break; }
                     await Task.Delay(bartenderSpeed + runPubSpeed);
                     //Log.Items.Insert(0, bartenderTemp);
+
                 }
 
             }
-
             if (bartenderIsWorking && pubIsOpen) Bartender();
         }
 
@@ -330,42 +329,28 @@ namespace WpfApp1
             if (Debug) { Log.Items.Insert(0, $"Bouncer final value: {bouncerGroupSize}"); }
 
             if (pubIsOpen && bouncerGroupSize == 0) Bouncer();
+
         }
 
         public async void GuestAction()
         {
             await Task.Delay(1);
 
+            Log.Items.Add("running add");
+
             if (nrOfGuestServed > 0 && currentGuestIndex < nrOfGuestServed)
             {
-                MyDel myDel = new MyDel(TestThis);
 
                 if (chairs > 0 && currentGuestIndex < guestCount)
                 {
-                    TestThis(patronList[0].GuestList[currentGuestIndex].Sit(), 2000);
-                    chairs--;
-                    guestsSitting++;
-                    TestThis(patronList[0].GuestList[currentGuestIndex].Drink(), 5000);
-                    TestThis(patronList[0].GuestList[currentGuestIndex].Leave(), 2000);
-                    guestsSitting--;
-                    //patronList[0].GuestList[currentGuestIndex].Test(true);
-                    chairs++;
-                    currentGuestIndex++;
+
                 }
                 else
                 {
-                    TestThis(patronList[0].GuestList[currentGuestIndex].Stand(), 2000);
-                    chairs--;
-                    guestsSitting++;
-                    TestThis(patronList[0].GuestList[currentGuestIndex].Drink(), 5000);
-                    TestThis(patronList[0].GuestList[currentGuestIndex].Leave(), 2000);
-                    //patronList[0].GuestList[currentGuestIndex].Test(false);
-                    currentGuestIndex++;
+
                 }
             }
-
             //await Task.Delay(guestSpeed + runPubSpeed * 10);
-            if (pubIsOpen) GuestAction();
         }
 
         public async void Waitress()
@@ -403,6 +388,7 @@ namespace WpfApp1
             if (pubIsOpen) Waitress();
 
         }
+
         public delegate void MyDel(string s, int i);
 
         public void TestThis(string s, int i)

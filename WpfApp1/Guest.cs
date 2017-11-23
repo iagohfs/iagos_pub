@@ -11,8 +11,42 @@ namespace WpfApp1
  /// </summary>
     public class Guest
     {
-        public new string Name { get; set; }
+        public string Name { get; set; }
         public int Number { get; set; }
+
+        private int guestNr = 0;
+        private int index = 0;
+        string currGuestName;
+
+        Random Random = new Random();
+        public List<Guest> GuestList = new List<Guest>();
+
+        List<string> Names = new List<string>()
+        {
+            "Gigi", "Aline","Ericka","Jeanine","Apryl",
+            "Jarrod","Estelle","Magda","Coral","Ardelle",
+            "Lena","Allen","Emmitt","Mafalda","Jannette",
+            "Sal","Christen","Lane","Duane","Joseph",
+            "Hien","Ruthe","Danyell","Britney","Romana",
+            "Laraine","Branda","Kasha","Lecia","Hollie",
+            "Lachelle","Svetlana","Joya","Karin","Jovan",
+            "Kendal","Tanna","Jacalyn","Bellav","Joellev",
+            "Domenica","Suzie","Errol","Lilly","Stacee",
+            "Evalyn","Ardell","Gregoria","Shonta","Eldridge"
+        };
+
+        /// <summary>
+        /// Creates and add a single guest to the Patron public GuestList and returns the guest number and name.
+        /// </summary>
+        public object Bouncer()
+        {
+            currGuestName = Names[Random.Next(1, 31)];
+            guestNr++;
+            GuestList.Add(new Guest(guestNr, currGuestName));
+            if (GuestList.Count > 1) { index++; }
+            
+            return GuestList[index].GuestInfo();
+        }
 
         public Guest(int nr = 0, string name = "Default Name")
         {
