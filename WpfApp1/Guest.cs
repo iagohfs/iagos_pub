@@ -9,10 +9,9 @@ namespace WpfApp1
 {/// <summary>
  /// Constructor for object Guest.
  /// </summary>
-    public class Guest : MainWindow
+    public class Guest
     {
-        public delegate string DoThis();
-        public string Name { get; set; }
+        public new string Name { get; set; }
         public int Number { get; set; }
 
         public Guest(int nr = 0, string name = "Default Name")
@@ -26,16 +25,6 @@ namespace WpfApp1
         /// </summary>
         public string GuestInfo() => $"{Number}. {Name}";
 
-        public string GuestAction()
-        {
-            DoThis doThis = new DoThis(GuestAction);
-            doThis();
-            doThis += Drink;
-            doThis += Leave;
-
-            return null;
-        }
-
         public string Sit() => $"{Number}. {Name} is sitting";
 
         public string Stand() => $"{Number}. {Name} is standing";
@@ -43,5 +32,6 @@ namespace WpfApp1
         public string Drink() => $"{Number}. {Name} is drinking";
 
         public string Leave() => $"{Number}. {Name} has left";
+
     }
 }
