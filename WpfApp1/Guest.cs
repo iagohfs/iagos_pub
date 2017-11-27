@@ -9,39 +9,91 @@ namespace WpfApp1
 {/// <summary>
  /// Constructor for object Guest.
  /// </summary>
-    public class Guest : MainWindow
+    public class Guest
     {
-        public delegate string DoThis();
         public string Name { get; set; }
         public int Number { get; set; }
+        public bool Served { get; set; }
 
-        public Guest(int nr = 0, string name = "Default Name")
+        private int guestNr = 0;
+        private int index = 0;
+        string currGuestName;
+
+        Random Random = new Random();
+        public List<Guest> GuestList = new List<Guest>();
+        public Action Action;
+
+        List<string> Names = new List<string>()
+        {
+            "Gigi", "Aline","Ericka","Jeanine","Apryl",
+            "Jarrod","Estelle","Magda","Coral","Ardelle",
+            "Lena","Allen","Emmitt","Mafalda","Jannette",
+            "Sal","Christen","Lane","Duane","Joseph",
+            "Hien","Ruthe","Danyell","Britney","Romana",
+            "Laraine","Branda","Kasha","Lecia","Hollie",
+            "Lachelle","Svetlana","Joya","Karin","Jovan",
+            "Kendal","Tanna","Jacalyn","Bellav","Joellev",
+            "Domenica","Suzie","Errol","Lilly","Stacee",
+            "Evalyn","Ardell","Gregoria","Shonta","Eldridge"
+        };
+
+        /// <summary>
+        /// Creates and add a single guest to the Patron public GuestList and returns the guest number and name.
+        /// </summary>
+        public object Bouncer()
+        {
+            currGuestName = Names[Random.Next(1, 31)];
+            guestNr++;
+            GuestList.Add(new Guest(guestNr, currGuestName));
+            if (GuestList.Count > 1) { index++; }
+
+            return GuestList[index].GuestInfo();
+        }
+
+        public Guest(int nr = 0, string name = "Default Name", bool b = false)
         {
             Number = nr;
             Name = name;
+            Served = b;
         }
 
         /// <summary>
         /// Returns guest number and name.
         /// </summary>
         public string GuestInfo() => $"{Number}. {Name}";
+        public delegate string hello();
 
-        public string GuestAction()
+        public string Do(int i)
         {
-            DoThis doThis = new DoThis(GuestAction);
-            doThis();
-            doThis += Drink;
-            doThis += Leave;
+            if (i == 1)
+            {
+                return Sit();
+            }
+
+            if (i == 2)
+            {
+                return Drink();
+            }
+
+            if (i == 3)
+            {
+                return Leave();
+            }
+
+            if (i == 4)
+            {
+                return Stand();
+            }
 
             return null;
         }
 
-        public string Sit() => $"{Number}. {Name} is sitting";
+        public string Sit() => $"{GuestInfo()} is sitting";
 
-        public string Stand() => $"{Number}. {Name} is standing";
+        public string Stand() => $"{GuestInfo()} is standing";
 
-        public string Drink() => $"{Number}. {Name} is drinking";
+        public string Drink() => $"{GuestInfo()} is drinking";
 
-        public string Leave() => $"{Number}. {Name} has left";
+        public string Leave() => $"{GuestInfo()} has left";
     }
 }
