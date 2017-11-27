@@ -13,6 +13,7 @@ namespace WpfApp1
     {
         public string Name { get; set; }
         public int Number { get; set; }
+        public bool Served { get; set; }
 
         private int guestNr = 0;
         private int index = 0;
@@ -49,10 +50,11 @@ namespace WpfApp1
             return GuestList[index].GuestInfo();
         }
 
-        public Guest(int nr = 0, string name = "Default Name")
+        public Guest(int nr = 0, string name = "Default Name", bool b = false)
         {
             Number = nr;
             Name = name;
+            Served = b;
         }
 
         /// <summary>
@@ -78,7 +80,7 @@ namespace WpfApp1
                 return Leave();
             }
 
-            if(i == 4)
+            if (i == 4)
             {
                 return Stand();
             }
@@ -86,24 +88,12 @@ namespace WpfApp1
             return null;
         }
 
-        public string Sit()
-        {
-            return $"{GuestInfo()} is sitting";
-        }
+        public string Sit() => $"{GuestInfo()} is sitting";
 
-        public string Stand()
-        {
-            return $"{GuestInfo()} is standing";
-        }
+        public string Stand() => $"{GuestInfo()} is standing";
 
-        public string Drink()
-        {
-            return $"{GuestInfo()} is drinking";
-        }
+        public string Drink() => $"{GuestInfo()} is drinking";
 
-        public string Leave()
-        {
-            return $"{GuestInfo()} has left";
-        }
+        public string Leave() => $"{GuestInfo()} has left";
     }
 }

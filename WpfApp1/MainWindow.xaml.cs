@@ -24,6 +24,7 @@ namespace WpfApp1
         List<Guest> patronList = new List<Guest>();
         Random random = new Random();
         public delegate void GuestDel();
+        public delegate string MyDel(int i);
 
         bool bouncerIsWorking;
         bool bartenderIsWorking;
@@ -33,12 +34,16 @@ namespace WpfApp1
         bool pubIsOpen;
         bool groupDone;
 
+        bool couplesNight;
+        bool busGroup;
+
         private bool Debug;
 
         protected int runPubSpeed;
         private int bouncerSpeed;
         private int bartenderSpeed;
         private int waitressSpeed;
+        static int startGlassValue = 8;
 
         int cleanGlasses;
         protected int dirtyGlasses;
@@ -66,34 +71,43 @@ namespace WpfApp1
             if (B_PP.IsInitialized && patronList.Count > 0)
             {
                 pubIsOpen = false;
-                Reset();
+                ClosePub();
             }
 
             if (patronList.Count == 0)
             {
                 patronList.Add(new Guest());
 
-                bouncerSpeed = runPubSpeed;
-                bartenderSpeed = runPubSpeed;
+                bouncerSpeed = runPubSpeed * 4;
+                bartenderSpeed = runPubSpeed * 4;
                 guestSpeed = 1000;
 
-                pubIsOpen = true;
-                cleanGlasses = 20;
-                chairs = 15;
+                chairs = 9;
                 dirtyGlasses = 0;
                 nrOfGuestServed = 0;
                 currentGuestIndex = -1;
                 guestsSitting = 0;
                 remaningGuests = 0;
+                groupOfPeople = 1;
+                cleanGlasses = startGlassValue;
 
+                pubIsOpen = true;
+                groupDone = true;
                 bouncerIsWorking = true;
-
                 bartenderIsWorking = true;
                 firstBartenderIndex = true;
+                waitressIsWorking = true;
                 bartenderIndex = -1;
 
-                groupDone = true;
-                bouncerGroupSize = 0;
+                if (busGroup)
+                {
+                    bouncerSpeed = 2000;
+                }
+
+                if (couplesNight)
+                {
+                    groupOfPeople = 2;
+                }
 
                 Start();
             }
@@ -169,14 +183,14 @@ namespace WpfApp1
 
         private void S_Waitress_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            waitressSpeed = (int)S_Waitress.Value * 200;
+            waitressSpeed = (int)S_Waitress.Value * 1000;
         }
 
         public async void Bartender()
         {
             await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
-            await Task.Delay(bartenderSpeed + runPubSpeed);
             BarStatus();
+
             if (cleanGlasses <= 0)
             {
                 Label_Bartender.Content = "Bartender (Waiting)";
@@ -186,45 +200,50 @@ namespace WpfApp1
                 Label_Bartender.Content = "Bartender (Working)";
             }
 
-            if (bartenderIsWorking && pubIsOpen && cleanGlasses > 0 && guestCount > 0)
+            if (cleanGlasses > 0 && guestCount > 0)
             {
-                for (int i = 0; guestCount > 0 && bartenderIsWorking && pubIsOpen && guestCount > bartenderIndex; i--)
+                for (int i = 0; guestCount > 0; i--)
                 {
                     i++;
+
                     await Task.Run(async () => { while (!bartenderIsWorking) { await Task.Delay(1); } });
-                    await Task.Delay(bartenderSpeed + runPubSpeed);
 
                     if (guestCount == 1 && firstBartenderIndex)
                     {
                         bartenderIndex++;
+                        patronList[0].GuestList[bartenderIndex].Served = true;
 
                         cleanGlasses--;
                         BarStatus();
-                        await Task.Delay(bartenderSpeed + runPubSpeed);
+
+                        await Task.Delay(bartenderSpeed * 3);
                         L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
 
-                        await Task.Delay(bartenderSpeed + runPubSpeed);
+                        await Task.Delay(bartenderSpeed * 3);
+                        await Task.Delay(runPubSpeed);
                         L_Bartender.Items.Insert(0, patronList[0].GuestList[bartenderIndex].Name + " served.");
                         nrOfGuestServed++;
+                        remaningGuests++;
                         BarStatus();
                         if (Debug) Log.Items.Insert(0, "Bart Index: " + bartenderIndex);
 
                         firstBartenderIndex = false;
-
                     }
 
-                    if (guestCount - 1 > bartenderIndex && cleanGlasses > 0)
+                    if (nrOfGuestServed < guestCount && cleanGlasses > 0)
                     {
                         bartenderIndex++;
 
                         cleanGlasses--;
                         BarStatus();
-                        await Task.Delay(bartenderSpeed + runPubSpeed);
+                        await Task.Delay(bartenderSpeed * 3);
                         L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
 
-                        await Task.Delay(bartenderSpeed + runPubSpeed);
+                        await Task.Delay(bartenderSpeed * 3);
                         L_Bartender.Items.Insert(0, patronList[0].GuestList[bartenderIndex].Name + " served.");
+                        patronList[0].GuestList[bartenderIndex].Served = true;
                         nrOfGuestServed++;
+                        remaningGuests++;
                         BarStatus();
 
                         if (Debug) Log.Items.Insert(0, "Bart Index: " + bartenderIndex);
@@ -239,45 +258,49 @@ namespace WpfApp1
                         Label_Bartender.Content = "Bartender (Working)";
                     }
 
-                    if (guestCount == bartenderIndex) { break; }
-                    await Task.Delay(bartenderSpeed + runPubSpeed);
+                    if (guestCount == bartenderIndex || !pubIsOpen) { break; }
                     //Log.Items.Insert(0, bartenderTemp);
-
                 }
 
             }
-            if (bartenderIsWorking && pubIsOpen) Bartender();
+
+            if (bartenderIsWorking && bouncerIsWorking || nrOfGuestServed < guestCount) Bartender();
+
+            if (!pubIsOpen && nrOfGuestServed == guestCount)
+            {
+                Log.Items.Insert(0, "Bartender going home");
+                bartenderIsWorking = false;
+            }
+        }
+
+        public async void BusGroup()
+        {
+            await Task.Delay(bouncerSpeed * random.Next(3, 9));
+            groupOfPeople = 15;
         }
 
         public async void Bouncer()
         {
+            await Task.Delay(bouncerSpeed * random.Next(2, 10));
             await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
-            await Task.Delay(bouncerSpeed + runPubSpeed);
 
-            if (bouncerGroupSize == 0 && groupDone && pubIsOpen)
+            if (groupDone && pubIsOpen)
             {
+                groupDone = false;
                 await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
-                await Task.Delay(bouncerSpeed + runPubSpeed);
-
-                groupOfPeople = random.Next(0, 6);
-                bouncerGroupSize = groupOfPeople;
-
-                await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
-
-                if (groupOfPeople > 0 && pubIsOpen)
-                {
-                    L_Bouncer.Items.Insert(0, $"Letting {groupOfPeople} guest(s) in");
-                    groupDone = false;
-                }
-
-                await Task.Delay(bouncerSpeed + runPubSpeed);
+                L_Bouncer.Items.Insert(0, $"Letting {groupOfPeople} guest(s) in");
             }
-
-            await Task.Delay(bouncerSpeed + runPubSpeed);
-            await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
 
             if (!groupDone && pubIsOpen)
             {
+                if (busGroup)
+                {
+                    BusGroup();
+                    L_Bouncer.Items.Insert(0, $"Letting {groupOfPeople} guest(s) in");
+                    busGroup = false;
+                }
+
+                bouncerGroupSize = groupOfPeople;
                 await Task.Run(async () => { while (!bouncerIsWorking) { await Task.Delay(1); } });
 
                 for (int i = 0; i < groupOfPeople && pubIsOpen; i++)
@@ -309,7 +332,9 @@ namespace WpfApp1
                         break;
                     }
                     await Task.Delay(bouncerSpeed + runPubSpeed);
+                    groupDone = true;
                 }
+                if (!busGroup) { groupOfPeople = 1; }
             }
             else
             {
@@ -321,11 +346,6 @@ namespace WpfApp1
                 await Task.Delay(bouncerSpeed + runPubSpeed);
             }
 
-            if (bouncerGroupSize <= 0 && pubIsOpen)
-            {
-                bouncerGroupSize = 0;
-                groupDone = true;
-            }
 
             if (Debug) { Log.Items.Insert(0, $"Bouncer final value: {bouncerGroupSize}"); }
 
@@ -337,18 +357,20 @@ namespace WpfApp1
         {
             await Task.Delay(1);
 
-            if (currentGuestIndex < nrOfGuestServed - 1)
-
-                if (nrOfGuestServed > 0 && currentGuestIndex < guestCount - 1)
+            if (chairs > 0)
+            {
+                if (nrOfGuestServed > currentGuestIndex + 1)
                 {
                     currentGuestIndex++;
-                    Guest guest = patronList[0].GuestList[currentGuestIndex];
-                    MyDel my = new MyDel(guest.Do);
 
-                    if (chairs > 0 && currentGuestIndex < guestCount)
+                    if (patronList[0].GuestList[currentGuestIndex].Served)
                     {
+                        Guest guest = patronList[0].GuestList[currentGuestIndex];
+                        MyDel my = new MyDel(guest.Do);
+
                         Log.Items.Insert(0, my(1));
                         chairs--;
+                        guestsSitting++;
                         await Task.Delay(guestSpeed * 5);
                         Log.Items.Insert(0, my(2));
                         await Task.Delay(guestSpeed * 10);
@@ -356,40 +378,34 @@ namespace WpfApp1
                         await Task.Delay(guestSpeed);
                         chairs++;
                         dirtyGlasses++;
-
+                        guestsSitting--;
+                        BarStatus();
                     }
-                    else
-                    {
-                        Log.Items.Insert(0, my(4));
-                        await Task.Delay(guestSpeed * 5);
-                        Log.Items.Insert(0, my(2));
-                        await Task.Delay(guestSpeed * 10);
-                        Log.Items.Insert(0, my(3));
-                        await Task.Delay(guestSpeed);
-                        dirtyGlasses++;
 
-                    }
                 }
+
+            }
+
         }
 
         public async void Waitress()
         {
-            await Task.Run(async () => { while (!pubIsOpen) { await Task.Delay(1); } });
-            await Task.Delay(waitressSpeed + runPubSpeed);
+            await Task.Run(async () => { while (!waitressIsWorking) { await Task.Delay(1); } });
 
-            if (dirtyGlasses > 0 && cleanGlasses <= 20)
+            if (dirtyGlasses > 0)
             {
                 for (int i = 0; i < dirtyGlasses; i++)
                 {
                     L_Waitress.Items.Insert(0, $"Cleaning table");
-                    await Task.Run(async () => { while (!pubIsOpen) { await Task.Delay(1); } });
-                    await Task.Delay(waitressSpeed + runPubSpeed * 5);
+                    dirtyGlasses--;
+                    await Task.Run(async () => { while (!waitressIsWorking) { await Task.Delay(1); } });
+                    await Task.Delay(waitressSpeed * 5);
                     L_Waitress.Items.Insert(0, $"Washing");
 
-                    await Task.Run(async () => { while (!pubIsOpen) { await Task.Delay(1); } });
-                    await Task.Delay(waitressSpeed + runPubSpeed * 5);
+                    await Task.Run(async () => { while (!waitressIsWorking) { await Task.Delay(1); } });
+                    await Task.Delay(waitressSpeed * 15);
                     L_Waitress.Items.Insert(0, $"Done!");
-                    dirtyGlasses--;
+
                     cleanGlasses++;
 
                     if (dirtyGlasses < 0)
@@ -398,26 +414,23 @@ namespace WpfApp1
                     }
 
                     BarStatus();
-                    await Task.Delay(waitressSpeed + runPubSpeed * 5);
-                    await Task.Run(async () => { while (!pubIsOpen) { await Task.Delay(1); } });
+                    await Task.Delay(waitressSpeed * 5);
+                    await Task.Run(async () => { while (!waitressIsWorking) { await Task.Delay(1); } });
                 }
             }
 
-            await Task.Run(async () => { while (!pubIsOpen) { await Task.Delay(1); } });
-            if (pubIsOpen) Waitress();
+            if (cleanGlasses == startGlassValue && !pubIsOpen) { waitressIsWorking = false; Log.Items.Insert(0, "Waitress went home"); }
+
+            if (waitressIsWorking || dirtyGlasses > 0) Waitress();
 
         }
 
-        public delegate string MyDel(int i);
-
-        public async void TestThis()
+        public async void GuestDo()
         {
             await Task.Delay(guestSpeed + runPubSpeed);
             GuestDel guest = new GuestDel(GuestAction);
-            guest();
-            await Task.Delay(guestSpeed + runPubSpeed);
-            TestThis();
-
+            if (nrOfGuestServed <= guestCount) guest();
+            GuestDo();
         }
 
         public void Start()
@@ -429,8 +442,16 @@ namespace WpfApp1
                 Bouncer();
                 Bartender();
                 Waitress();
-                TestThis();
+                GuestDo();
+                Timer();
             }
+        }
+
+        public async void Timer()
+        {
+            await Task.Delay(2 * 5000);
+            pubIsOpen = false;
+            ClosePub();
         }
 
         public void BarStatus()
@@ -454,14 +475,15 @@ namespace WpfApp1
             B_PP.Content = "Stop Everything";
         }
 
-        public async void Reset()
+        public async void ClosePub()
         {
+            pubIsOpen = false;
             B_Bartender.IsEnabled = false;
             B_Bartender.Content = "Pause";
 
             B_Bouncer.IsEnabled = false;
+            bouncerIsWorking = false;
             B_Bouncer.Content = "Pause";
-
 
             B_Waitress.IsEnabled = false;
             B_Waitress.Content = "Pause";
@@ -473,17 +495,37 @@ namespace WpfApp1
             await Task.Delay(runPubSpeed * 10);
             Log.Items.Insert(0, "Bouncer going home");
 
-            await Task.Delay(runPubSpeed * 10);
-            Log.Items.Insert(0, "Bartender going home");
-
-            await Task.Delay(runPubSpeed * 10);
-            Log.Items.Insert(0, "Waitress going home");
-
-            await Task.Delay(runPubSpeed * 15);
-            Log.Items.Insert(0, "Hostage Count: " + (patronList[0].GuestList.Count - remaningGuests));
-
         }
 
+        private void Couples_Night_Click(object sender, RoutedEventArgs e)
+        {
+            couplesNight = true;
+            Bus_Group.IsEnabled = false;
+            Couples_Night.IsEnabled = false;
+            Stay_Longer.IsEnabled = false;
+
+            Guest_Top_Label.Content = "Guest: Cuples Night";
+        }
+
+        private void Bus_Group_Click(object sender, RoutedEventArgs e)
+        {
+            busGroup = true;
+            Couples_Night.IsEnabled = false;
+            Bus_Group.IsEnabled = false;
+            Stay_Longer.IsEnabled = false;
+
+            Guest_Top_Label.Content = "Guest: Party Night";
+        }
+
+        private void Stay_Longer_Click(object sender, RoutedEventArgs e)
+        {
+            Couples_Night.IsEnabled = false;
+            Bus_Group.IsEnabled = false;
+            Stay_Longer.IsEnabled = false;
+            guestSpeed = 2000;
+
+            Guest_Top_Label.Content = "Guest: Chill Night";
+        }
     }
 
 }
