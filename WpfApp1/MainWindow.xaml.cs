@@ -23,7 +23,7 @@ namespace WpfApp1
     {
         List<Guest> patronList = new List<Guest>();
         Random random = new Random();
-        public delegate string GuestDel();
+        public delegate void GuestDel();
 
         bool bouncerIsWorking;
         bool bartenderIsWorking;
@@ -58,6 +58,7 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
+
         }
 
         private void B_PP_Click(object sender, RoutedEventArgs e)
@@ -74,14 +75,14 @@ namespace WpfApp1
 
                 bouncerSpeed = runPubSpeed;
                 bartenderSpeed = runPubSpeed;
-                guestSpeed = (runPubSpeed * 2);
+                guestSpeed = 1000;
 
                 pubIsOpen = true;
                 cleanGlasses = 20;
                 chairs = 15;
                 dirtyGlasses = 0;
                 nrOfGuestServed = 0;
-                currentGuestIndex = 0;
+                currentGuestIndex = -1;
                 guestsSitting = 0;
                 remaningGuests = 0;
 
@@ -336,21 +337,39 @@ namespace WpfApp1
         {
             await Task.Delay(1);
 
-            Log.Items.Add("running add");
+            if (currentGuestIndex < nrOfGuestServed - 1)
 
-            if (nrOfGuestServed > 0 && currentGuestIndex < nrOfGuestServed)
-            {
-
-                if (chairs > 0 && currentGuestIndex < guestCount)
+                if (nrOfGuestServed > 0 && currentGuestIndex < guestCount - 1)
                 {
+                    currentGuestIndex++;
+                    Guest guest = patronList[0].GuestList[currentGuestIndex];
+                    MyDel my = new MyDel(guest.Do);
 
-                }
-                else
-                {
+                    if (chairs > 0 && currentGuestIndex < guestCount)
+                    {
+                        Log.Items.Insert(0, my(1));
+                        chairs--;
+                        await Task.Delay(guestSpeed * 5);
+                        Log.Items.Insert(0, my(2));
+                        await Task.Delay(guestSpeed * 10);
+                        Log.Items.Insert(0, my(3));
+                        await Task.Delay(guestSpeed);
+                        chairs++;
+                        dirtyGlasses++;
 
+                    }
+                    else
+                    {
+                        Log.Items.Insert(0, my(4));
+                        await Task.Delay(guestSpeed * 5);
+                        Log.Items.Insert(0, my(2));
+                        await Task.Delay(guestSpeed * 10);
+                        Log.Items.Insert(0, my(3));
+                        await Task.Delay(guestSpeed);
+                        dirtyGlasses++;
+
+                    }
                 }
-            }
-            //await Task.Delay(guestSpeed + runPubSpeed * 10);
         }
 
         public async void Waitress()
@@ -389,13 +408,16 @@ namespace WpfApp1
 
         }
 
-        public delegate void MyDel(string s, int i);
+        public delegate string MyDel(int i);
 
-        public void TestThis(string s, int i)
+        public async void TestThis()
         {
-            i = i;
+            await Task.Delay(guestSpeed + runPubSpeed);
+            GuestDel guest = new GuestDel(GuestAction);
+            guest();
+            await Task.Delay(guestSpeed + runPubSpeed);
+            TestThis();
 
-            Log.Items.Insert(0, s);
         }
 
         public void Start()
@@ -407,8 +429,7 @@ namespace WpfApp1
                 Bouncer();
                 Bartender();
                 Waitress();
-                GuestAction();
-
+                TestThis();
             }
         }
 

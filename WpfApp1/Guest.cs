@@ -20,6 +20,7 @@ namespace WpfApp1
 
         Random Random = new Random();
         public List<Guest> GuestList = new List<Guest>();
+        public Action Action;
 
         List<string> Names = new List<string>()
         {
@@ -44,7 +45,7 @@ namespace WpfApp1
             guestNr++;
             GuestList.Add(new Guest(guestNr, currGuestName));
             if (GuestList.Count > 1) { index++; }
-            
+
             return GuestList[index].GuestInfo();
         }
 
@@ -58,14 +59,51 @@ namespace WpfApp1
         /// Returns guest number and name.
         /// </summary>
         public string GuestInfo() => $"{Number}. {Name}";
+        public delegate string hello();
 
-        public string Sit() => $"{Number}. {Name} is sitting";
+        public string Do(int i)
+        {
+            if (i == 1)
+            {
+                return Sit();
+            }
 
-        public string Stand() => $"{Number}. {Name} is standing";
+            if (i == 2)
+            {
+                return Drink();
+            }
 
-        public string Drink() => $"{Number}. {Name} is drinking";
+            if (i == 3)
+            {
+                return Leave();
+            }
 
-        public string Leave() => $"{Number}. {Name} has left";
+            if(i == 4)
+            {
+                return Stand();
+            }
 
+            return null;
+        }
+
+        public string Sit()
+        {
+            return $"{GuestInfo()} is sitting";
+        }
+
+        public string Stand()
+        {
+            return $"{GuestInfo()} is standing";
+        }
+
+        public string Drink()
+        {
+            return $"{GuestInfo()} is drinking";
+        }
+
+        public string Leave()
+        {
+            return $"{GuestInfo()} has left";
+        }
     }
 }
