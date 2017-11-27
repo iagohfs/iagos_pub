@@ -461,8 +461,7 @@ namespace WpfApp1
         {
             await Task.Delay(guestSpeed + runPubSpeed);
             GuestDel guest = new GuestDel(GuestAction);
-            if (nrOfGuestServed <= guestCount) guest();
-            GuestDo();
+            if (nrOfGuestServed <= guestCount) { guest(); GuestDo(); }
         }
 
         public void Start()
