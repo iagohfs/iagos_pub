@@ -1,0 +1,11 @@
+Iagos Pub labb
+
+Jag har endast kollat på Olles labb
+Bra design av kod, bra gui och simulationen fungerade perfekt.
+Grym idé att varje person hade sin egen hastighet.
+
+Kan inte tänka mig nåt, jag var faktiskt imponerad på deras labb.
+I mitt labb hade jag kunna göra en efektivare kod men jag lärde mig mycket genom att prova mycket nya teknik
+och förutom det så hade jag kunnat tänka en ett annat sätt att skriva koden som inte fyller hela MainWindow med variabler.
+
+Annars är jag nöjd :)
