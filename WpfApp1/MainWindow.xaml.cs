@@ -80,7 +80,7 @@ namespace WpfApp1
 
                 bouncerSpeed = runPubSpeed * 4;
                 bartenderSpeed = runPubSpeed * 4;
-                guestSpeed = 1000;
+                guestSpeed = runPubSpeed * 4;
 
                 chairs = 9;
                 dirtyGlasses = 0;
@@ -174,6 +174,36 @@ namespace WpfApp1
                 Debugger.Content = "Debug Off";
                 Debug = false;
             }
+        }
+
+        private void Couples_Night_Click(object sender, RoutedEventArgs e)
+        {
+            couplesNight = true;
+            Bus_Group.IsEnabled = false;
+            Couples_Night.IsEnabled = false;
+            Stay_Longer.IsEnabled = false;
+
+            Guest_Top_Label.Content = "Guest: Cuples Night";
+        }
+
+        private void Bus_Group_Click(object sender, RoutedEventArgs e)
+        {
+            busGroup = true;
+            Couples_Night.IsEnabled = false;
+            Bus_Group.IsEnabled = false;
+            Stay_Longer.IsEnabled = false;
+
+            Guest_Top_Label.Content = "Guest: Party Night";
+        }
+
+        private void Stay_Longer_Click(object sender, RoutedEventArgs e)
+        {
+            Couples_Night.IsEnabled = false;
+            Bus_Group.IsEnabled = false;
+            Stay_Longer.IsEnabled = false;
+            guestSpeed = 2000;
+
+            Guest_Top_Label.Content = "Guest: Chill Night";
         }
 
         private void S_Speed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -358,7 +388,7 @@ namespace WpfApp1
         public async void GuestAction()
         {
             await Task.Delay(1);
-
+            while (chairs == 0) { }
             if (chairs > 0)
             {
                 if (nrOfGuestServed > currentGuestIndex + 1)
@@ -451,7 +481,7 @@ namespace WpfApp1
 
         public async void Timer()
         {
-            await Task.Delay(2 * 5000);
+            await Task.Delay(2 * 60000);
             pubIsOpen = false;
             ClosePub();
         }
@@ -459,7 +489,7 @@ namespace WpfApp1
         public void BarStatus()
         {
             Guest_Label.Content = $"Served: {nrOfGuestServed}\nSitting: {guestsSitting}";
-            BarStatus_Label.Content = $"Bar is Open!\nGlasses: {cleanGlasses}\nChairs: {chairs}";
+            BarStatus_Label.Content = $"Bar is Open!\nClean Glasses: {cleanGlasses}\nAvailable Chairs: {chairs}";
             Dirty_Label.Content = $"Dirty Glass(es): {dirtyGlasses}";
         }
 
@@ -499,35 +529,6 @@ namespace WpfApp1
 
         }
 
-        private void Couples_Night_Click(object sender, RoutedEventArgs e)
-        {
-            couplesNight = true;
-            Bus_Group.IsEnabled = false;
-            Couples_Night.IsEnabled = false;
-            Stay_Longer.IsEnabled = false;
-
-            Guest_Top_Label.Content = "Guest: Cuples Night";
-        }
-
-        private void Bus_Group_Click(object sender, RoutedEventArgs e)
-        {
-            busGroup = true;
-            Couples_Night.IsEnabled = false;
-            Bus_Group.IsEnabled = false;
-            Stay_Longer.IsEnabled = false;
-
-            Guest_Top_Label.Content = "Guest: Party Night";
-        }
-
-        private void Stay_Longer_Click(object sender, RoutedEventArgs e)
-        {
-            Couples_Night.IsEnabled = false;
-            Bus_Group.IsEnabled = false;
-            Stay_Longer.IsEnabled = false;
-            guestSpeed = 2000;
-
-            Guest_Top_Label.Content = "Guest: Chill Night";
-        }
     }
 
 }

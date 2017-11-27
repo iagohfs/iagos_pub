@@ -27,12 +27,12 @@
         <Label Content="&lt;- Fast | Normal | Slow -&gt;" HorizontalAlignment="Left" Margin="727,84,0,0" VerticalAlignment="Top" Height="26" Width="154" Grid.Row="2"/>
         <Label Content="Log" HorizontalAlignment="Left" Margin="727,3,0,0" VerticalAlignment="Top" Grid.RowSpan="2" Height="26" Width="70"/>
         <ListBox x:Name="Log" HorizontalAlignment="Left" Height="153" Margin="730,29,0,0" VerticalAlignment="Top" Width="140" Grid.RowSpan="2" Grid.Row="1"/>
-        <Label x:Name="BarStatus_Label" Content="Bar Closed." HorizontalAlignment="Left" Margin="365,96,0,0" VerticalAlignment="Top" Height="69" Width="75" Grid.Row="2"/>
+        <Label x:Name="BarStatus_Label" Content="Bar Closed." HorizontalAlignment="Left" Margin="365,95.585,0,0" VerticalAlignment="Top" Height="69" Width="155" Grid.Row="2"/>
         <Label x:Name="Guest_Label" Content="Served: 0&#xA;Sitting: 0&#xA;" HorizontalAlignment="Left" Margin="185,95.585,0,0" VerticalAlignment="Top" Height="46" Width="150" Grid.Row="2"/>
         <Button x:Name="Debugger" Content="Debug Off" HorizontalAlignment="Left" Margin="730,68,0,0" VerticalAlignment="Top" Width="65" Click="Debugger_Click" Grid.Row="2" Height="20"/>
         <Label x:Name="HelpL" Content="Off by default" HorizontalAlignment="Left" Margin="796,65,0,0" VerticalAlignment="Top" Height="25" Grid.Row="2" Width="83"/>
         <Label x:Name="Dirty_Label" Content="Dirty Glass(es): 0" HorizontalAlignment="Left" Margin="543,96,0,0" VerticalAlignment="Top" Grid.Row="2" Height="26" Width="97"/>
-        <Slider x:Name="S_Waitress" HorizontalAlignment="Left" Margin="549,145,0,0" VerticalAlignment="Top" Width="151" Value="1" Maximum="2" ValueChanged="S_Waitress_ValueChanged" Grid.Row="2" Height="18"/>
+        <Slider x:Name="S_Waitress" HorizontalAlignment="Left" Margin="549,145,0,0" VerticalAlignment="Top" Width="151" Value="1" Maximum="2" ValueChanged="S_Waitress_ValueChanged" Grid.Row="2" Height="18" TickFrequency="0.1"/>
         <Label x:Name="Guest_Top_Label" Content="Guests" HorizontalAlignment="Left" Margin="187,3,0,0" Grid.RowSpan="2" VerticalAlignment="Top" Width="153"/>
         <Button x:Name="Couples_Night" Content="Couples" HorizontalAlignment="Left" Margin="10,92.585,0,0" Grid.Row="2" VerticalAlignment="Top" Width="70" Click="Couples_Night_Click"/>
         <Button x:Name="Bus_Group" Content="Bus" HorizontalAlignment="Left" Margin="90,92.585,0,0" Grid.Row="2" VerticalAlignment="Top" Width="70" Click="Bus_Group_Click"/>
