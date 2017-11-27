@@ -213,31 +213,33 @@ namespace WpfApp1
                         bartenderIndex++;
                         patronList[0].GuestList[bartenderIndex].Served = true;
 
+                        await Task.Delay(bartenderSpeed);
+                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
+
+                        await Task.Delay(bartenderSpeed * 3);
                         cleanGlasses--;
                         BarStatus();
 
                         await Task.Delay(bartenderSpeed * 3);
-                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
-
-                        await Task.Delay(bartenderSpeed * 3);
-                        await Task.Delay(runPubSpeed);
                         L_Bartender.Items.Insert(0, patronList[0].GuestList[bartenderIndex].Name + " served.");
                         nrOfGuestServed++;
                         remaningGuests++;
                         BarStatus();
-                        if (Debug) Log.Items.Insert(0, "Bart Index: " + bartenderIndex);
 
+                        if (Debug) Log.Items.Insert(0, "Bart Index: " + bartenderIndex);
+                        await Task.Delay(bartenderSpeed * 3);
                         firstBartenderIndex = false;
                     }
 
                     if (nrOfGuestServed < guestCount && cleanGlasses > 0)
                     {
                         bartenderIndex++;
+                        await Task.Delay(bartenderSpeed);
+                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
 
+                        await Task.Delay(bartenderSpeed * 3);
                         cleanGlasses--;
                         BarStatus();
-                        await Task.Delay(bartenderSpeed * 3);
-                        L_Bartender.Items.Insert(0, "Serving " + patronList[0].GuestList[bartenderIndex].GuestInfo());
 
                         await Task.Delay(bartenderSpeed * 3);
                         L_Bartender.Items.Insert(0, patronList[0].GuestList[bartenderIndex].Name + " served.");
@@ -367,13 +369,13 @@ namespace WpfApp1
                     {
                         Guest guest = patronList[0].GuestList[currentGuestIndex];
                         MyDel my = new MyDel(guest.Do);
-
+                        await Task.Delay(guestSpeed * 4);
                         Log.Items.Insert(0, my(1));
                         chairs--;
                         guestsSitting++;
                         await Task.Delay(guestSpeed * 5);
                         Log.Items.Insert(0, my(2));
-                        await Task.Delay(guestSpeed * 10);
+                        await Task.Delay(guestSpeed * random.Next(9, 20));
                         Log.Items.Insert(0, my(3));
                         await Task.Delay(guestSpeed);
                         chairs++;
